@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Alice Johnson",
+    "account_number": "10010001",
+    "balance": 5230.75,
+    "account_type": "Savings",
+    "branch": "Downtown"
+  },
+  {
+    "name": "Bob Smith",
+    "account_number": "10010002",
+    "balance": 1200.00,
+    "account_type": "Checking",
+    "branch": "Uptown"
+  },
+  {
+    "name": "Carol Lee",
+    "account_number": "10010003",
+    "balance": 9800.50,
+    "account_type": "Savings",
+    "branch": "Central"
+  },
+  {
+    "name": "David Kim",
+    "account_number": "10010004",
+    "balance": 150.25,
+    "account_type": "Checking",
+    "branch": "Westside"
+  },
+  {
+    "name": "Eva Brown",
+    "account_number": "10010005",
+    "balance": 3000.00,
+    "account_type": "Savings",
+    "branch": "Eastside"
+  },
+  {
+    "name": "Frank Green",
+    "account_number": "10010006",
+    "balance": 450.00,
+    "account_type": "Checking",
+    "branch": "Downtown"
+  },
+  {
+    "name": "Grace Miller",
+    "account_number": "10010007",
+    "balance": 6700.10,
+    "account_type": "Savings",
+    "branch": "Uptown"
+  },
+  {
+    "name": "Henry Wilson",
+    "account_number": "10010008",
+    "balance": 250.00,
+    "account_type": "Checking",
+    "branch": "Central"
+  },
+  {
+    "name": "Ivy Martinez",
+    "account_number": "10010009",
+    "balance": 8000.00,
+    "account_type": "Savings",
+    "branch": "Westside"
+  },
+  {
+    "name": "Jack Davis",
+    "account_number": "10010010",
+    "balance": 120.75,
+    "account_type": "Checking",
+    "branch": "Eastside"
+  },
+  {
+    "name": "Karen White",
+    "account_number": "10010011",
+    "balance": 5400.00,
+    "account_type": "Savings",
+    "branch": "Downtown"
+  },
+  {
+    "name": "Leo Harris",
+    "account_number": "10010012",
+    "balance": 900.00,
+    "account_type": "Checking",
+    "branch": "Uptown"
+  }
+]
