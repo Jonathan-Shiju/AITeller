@@ -93,14 +93,15 @@ def send_audio_response(ws, audio_data, stream_sid):
     # Convert to 8kHz mu-law format required by Twilio
     mulaw_audio = convert_to_mulaw(audio_data)
 
-    # Send the audio response
-    ws.send({
+    response_data = {
         "event": "media",
         "media": {
             "payload": base64.b64encode(mulaw_audio).decode('utf-8'),
             "streamSid": stream_sid
         }
-    })
+    }
+
+    ws.send(json.dumps(response_data))
     logger.info("Sent audio response to client")
 
     # Send a mark event after sending audio to track when it's completed playing
@@ -123,7 +124,7 @@ def send_mark_event(ws, stream_sid, mark_name):
             "name": mark_name
         }
     }
-    ws.send(mark_event)
+    ws.send(json.dumps(mark_event))
     logger.info(f"Sent mark event with name: {mark_name}")
 
 def save_call_logs(stream_sid, call_sid, conversation_history):
@@ -168,7 +169,7 @@ def media_ws_helper(ws):
     queued_transcription = None  # Store the transcription for the queued audio
     queued_response = None  # Store the response text for the queued audio
 
-    while not ws.close:
+    while not ws.closed:
         try:
             message = ws.receive()
             if message is None:
@@ -176,12 +177,11 @@ def media_ws_helper(ws):
 
             data = json.loads(message)
             if data["event"] == "connected":
-                logger.info("Connected: ", message)
+                logger.info(f"Connected: {message}")
 
             elif data["event"] == "start":
                 stream_sid = data['start']['streamSid']
                 call_sid = data['start'].get('callSid')
-                # Log detailed stream information
                 logger.info("Stream started:")
                 logger.info(f"  Stream SID: {stream_sid}")
                 logger.info(f"  Account SID: {data['start'].get('accountSid', 'Not provided')}")
@@ -277,15 +277,7 @@ def media_ws_helper(ws):
             if stream_sid and conversation_history:
                 save_call_logs(stream_sid, call_sid, conversation_history)
             break
-        finally:
-            if stream_sid and conversation_history:
-                # Final attempt to save logs before closing
-                save_call_logs(stream_sid, call_sid, conversation_history)
 
-            # Explicitly close the WebSocket if it's still open
-            try:
-                if not ws.close:
-                    logger.info("Explicitly closing WebSocket connection")
-                    ws.close()
-            except Exception as e:
-                logger.error(f"Error closing WebSocket: {e}")
+    # Final cleanup
+    if stream_sid and conversation_history:
+        save_call_logs(stream_sid, call_sid, conversation_history)

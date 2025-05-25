@@ -107,6 +107,42 @@ class ConversationManager:
         else:
             return None
 
+# Global conversation manager instance
+conversation_manager = None
+
+def initialize_conversation_manager(ollama_model="llama2", rag_docs=None, tools=None):
+    """
+    Initialize the global conversation manager.
+    """
+    global conversation_manager
+    conversation_manager = ConversationManager(
+        ollama_model=ollama_model,
+        rag_docs=rag_docs,
+        tools=tools
+    )
+
+def generate_reply(prompt):
+    """
+    Generate a reply using the conversation manager.
+    This function is used by the Twilio VOIP service.
+
+    :param prompt: User's input prompt
+    :return: Generated response text
+    """
+    global conversation_manager
+
+    # Initialize conversation manager if not already done
+    if conversation_manager is None:
+        initialize_conversation_manager()
+
+    response = conversation_manager.conversational_agent(prompt)
+
+    # If the agent thinks the prompt is incomplete, return a default response
+    if response is None:
+        return "I didn't quite understand that. Could you please provide more details?"
+
+    return response
+
 # Example usage:
 # cm = ConversationManager(ollama_model="llama2")
 # print(cm.conversational_agent("What is the balance for Alice Johnson?"))
