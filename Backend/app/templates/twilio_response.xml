@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="alice" language="en-IN">
+    Welcome to the Twilio streaming demo. You will be connected to a live stream.
+    Please ensure your microphone is enabled and you are ready to speak.
+  </Say>
+  <Pause length="2"/>
+  <Connect>
+    <Stream url="{{ ngrok_url }}"></Stream>
+  </Connect>
+  <Say voice="alice" language="en-IN">
+    Thank you, Have a great day!
+  </Say>
+</Response>
+

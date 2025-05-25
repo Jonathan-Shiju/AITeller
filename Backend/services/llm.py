@@ -74,10 +74,12 @@ class ConversationManager:
 
     def conversational_agent(self, prompt: str, use_history: bool = True):
         """
-        Handles a prompt, uses tools/RAG if needed, and manages few-shot context.
+        Handles a prompt, letting the agent decide if the prompt is complete enough to respond.
+        The agent will use tools/RAG if needed, and manages few-shot context.
+
         :param prompt: User's prompt.
         :param use_history: Whether to include previous prompts for few-shot context.
-        :return: Agent's response.
+        :return: Agent's response or None if agent decides not to respond.
         """
         if use_history and self.history:
             # Combine previous prompts and current prompt for few-shot context
@@ -85,9 +87,25 @@ class ConversationManager:
         else:
             conversation = prompt
 
-        response = self.agent.run(conversation)
-        self.history.append(prompt)
-        return response
+        # Add instructions for the agent to evaluate if the prompt is complete
+        evaluation_prompt = (
+            f"{conversation}\n\n"
+            "Instructions: First determine if the above prompt is complete enough to respond to. "
+            "If the prompt seems incomplete, unclear, or requires additional context that isn't available, "
+            "respond with '<<INCOMPLETE_PROMPT>>' and nothing else. Otherwise, respond normally,"
+            "If the quesion seems complete, but for requires additional context, "
+            "please ask for the same.\n\n"
+            "Respond with the most relevant information or use tools/RAG if necessary."
+           )
+
+        response = self.agent.run(evaluation_prompt)
+
+        # Only save prompt to history if we're responding to it
+        if response.strip() != "<<INCOMPLETE_PROMPT>>":
+            self.history.append(prompt)
+            return response
+        else:
+            return None
 
 # Example usage:
 # cm = ConversationManager(ollama_model="llama2")
