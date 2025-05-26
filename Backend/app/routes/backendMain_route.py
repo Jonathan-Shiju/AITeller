@@ -5,7 +5,7 @@ logging = logging.getLogger(__name__)
 
 backendMain = Flask(__name__)
 
-@backendMain.route('', methods=['GET'])
+@backendMain.route('/', methods=['GET'])
 def backend_main():
     """
     Main route for the backend application.
@@ -20,7 +20,7 @@ def twilio_webhook():
     This route processes audio data, transcribes it, generates a reply,
     and sends back the audio response.
     """
-   logger.info("Received Twilio webhook request")
-   return render_template('twilio_response.xml'), 200, {'Content-Type': 'application/xml'}
+    logger.info("Received Twilio webhook request")
+    return render_template('twilio_response.xml'), 200, {'Content-Type': 'application/xml'}
 
 

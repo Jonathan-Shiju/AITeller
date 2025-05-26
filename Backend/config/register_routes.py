@@ -1,6 +1,6 @@
 from Backend.app import routes
 
-def register_routes(app):
+def register_all_routes(app):
     """
     Register all routes for the backend application.
 
