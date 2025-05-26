@@ -1,9 +1,9 @@
-from flask import Flask, render_template
+from flask import Blueprint, render_template
 import logging
 
-logging = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
-backendMain = Flask(__name__)
+backendMain = Blueprint('backendMain', __name__)
 
 @backendMain.route('/', methods=['GET'])
 def backend_main():

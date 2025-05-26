@@ -9,5 +9,5 @@ def register_all_routes(app):
 
     :param app: The Flask application instance.
     """
-    app.include_router(routes.backendMain)
+    app.register_blueprint(routes.backendMain)
     return app
