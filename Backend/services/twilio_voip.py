@@ -9,10 +9,56 @@ import os
 from datetime import datetime
 from scipy.io import wavfile
 from .whisper_stt import transcribe_audio
-from .llm import generate_reply
-from .coqui_tts import text_to_speech  # Changed from google_tts to coqui_tts
+from .llm import generate_reply, initialize_conversation_manager
+from .coqui_tts import text_to_speech
+from Backend.utils.embed_documents import embed_and_save
 
 logger = logging.getLogger(__name__)
+
+# Initialize conversation manager with persistent RAG on startup
+def initialize_rag_system():
+    """Initialize the RAG system with bank documents or existing persistent storage"""
+    try:
+        # Path for persistent RAG storage
+        persistent_rag_path = os.path.join(os.path.dirname(__file__), "../data/persistent_rag")
+
+        # Check if persistent storage already exists
+        if os.path.exists(persistent_rag_path) and os.path.exists(os.path.join(persistent_rag_path, "collection_name.txt")):
+            logger.info("Loading existing persistent RAG system...")
+            initialize_conversation_manager(
+                ollama_model="llama2",
+                persistent_rag_path=persistent_rag_path
+            )
+        else:
+            # Create new RAG system with bank policy documents
+            logger.info("Creating new persistent RAG system...")
+
+            # Sample bank documents - replace with actual bank policy documents
+            bank_docs = [
+                "Bank account minimum balance is $100. Accounts below this will incur a $25 monthly fee.",
+                "Overdraft protection is available for qualified customers with a $35 fee per occurrence.",
+                "ATM withdrawals are free at bank-owned ATMs. Other ATMs charge $2.50 per transaction.",
+                "Wire transfers: Domestic $25, International $45. Processing time is 1-3 business days.",
+                "Check deposits are available until 9 PM for same-day processing.",
+                "Customer service hours: Monday-Friday 8 AM to 8 PM, Saturday 9 AM to 5 PM.",
+            ]
+
+            # Create persistent storage
+            os.makedirs(persistent_rag_path, exist_ok=True)
+            embed_and_save(bank_docs, "llama2", persistent_rag_path)
+
+            # Initialize conversation manager with persistent RAG
+            initialize_conversation_manager(
+                ollama_model="llama2",
+                persistent_rag_path=persistent_rag_path
+            )
+
+        logger.info("RAG system initialized successfully")
+
+    except Exception as e:
+        logger.error(f"Failed to initialize RAG system: {e}")
+        # Fallback to basic conversation manager without RAG
+        initialize_conversation_manager(ollama_model="llama2")
 
 def process_buffer(buffer):
     """
@@ -31,17 +77,20 @@ def process_buffer(buffer):
         sf.write(tmp_wav, audio_np, 8000, subtype='PCM_16')
         tmp_wav_path = tmp_wav.name
 
-    result = transcribe_audio(tmp_wav_path)
-    transcription = result["text"]
+    # Use the updated transcribe_audio function
+    transcription = transcribe_audio(tmp_wav_path)
     logger.info(f"Transcription: {transcription}")
 
-    # Generate a reply using LLM
+    # Generate a reply using LLM with RAG integration
     reply = generate_reply(transcription)
     logger.info(f"Generated reply: {reply}")
 
     # Convert reply to speech using Coqui TTS (self-hosted)
     tts_audio = text_to_speech(reply)
     logger.info("Generated TTS audio using Coqui TTS")
+
+    # Clean up temp file
+    os.unlink(tmp_wav_path)
 
     return tts_audio, transcription, reply
 
@@ -158,6 +207,9 @@ def save_call_logs(stream_sid, call_sid, conversation_history):
         return None
 
 def media_ws_helper(ws):
+    # Initialize RAG system on first connection
+    initialize_rag_system()
+
     has_seen_media = False
     buffer = bytearray()
     stream_sid = None
