@@ -1,4 +1,4 @@
-from app_factory import return_app
+from Backend.config.app_factory import return_app
 import logging
 
 def setup_logging():

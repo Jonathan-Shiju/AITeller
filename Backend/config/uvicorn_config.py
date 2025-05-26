@@ -1,5 +1,5 @@
 import uvicorn
-from config.app_factory import create_app
+from Backend.config.app_factory import create_app
 
 def run_uvicorn():
     app = create_app()
