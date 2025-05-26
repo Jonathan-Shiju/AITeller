@@ -1,4 +1,5 @@
-from Backend.app import routes
+from Backend.app.routes.backendMain_route import backendMain, twilio_media_ws
+from flask_sockets import Sockets
 
 def register_all_routes(app):
     """
@@ -9,5 +10,10 @@ def register_all_routes(app):
 
     :param app: The Flask application instance.
     """
-    app.register_blueprint(routes.backendMain)
+    app.register_blueprint(backendMain)
+
+    # Setup WebSocket handling
+    sockets = Sockets(app)
+    sockets.route('/twilio-media-ws')(twilio_media_ws)
+
     return app

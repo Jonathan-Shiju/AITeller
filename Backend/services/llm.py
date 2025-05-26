@@ -335,7 +335,7 @@ class ConversationManager:
             "Instructions: First determine if the above prompt is complete enough to respond to. "
             "If the prompt seems incomplete, unclear, or requires additional context that isn't available, "
             "respond with '<<INCOMPLETE_PROMPT>>' and nothing else. Otherwise, respond normally,"
-            "If the quesion seems complete, but for requires additional context, "
+            "If the quesion seems complete, but requires additional context, "
             "please ask for the same.\n\n"
             "Respond with the most relevant information or use tools/RAG if necessary."
            )

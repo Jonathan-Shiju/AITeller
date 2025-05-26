@@ -1,6 +1,11 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 import logging
 import os
+from dotenv import load_dotenv
+from Backend.services.twilio_voip import media_ws_helper
+
+# Load environment variables from dev.env
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../../env/dev.env'))
 
 logger = logging.getLogger(__name__)
 
@@ -24,5 +29,11 @@ def twilio_webhook():
     logger.info("Received Twilio webhook request")
     ngrok_url = os.environ.get("NGROK_URL")
     return render_template('twilio_response.xml', ngrok_url=ngrok_url), 200, {'Content-Type': 'application/xml'}
+
+def twilio_media_ws(ws):
+    """
+    WebSocket endpoint for Twilio Media Streams.
+    """
+    media_ws_helper(ws)
 
 
