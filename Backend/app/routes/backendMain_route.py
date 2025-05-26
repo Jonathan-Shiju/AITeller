@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from quart import Blueprint, render_template, request, websocket
 import logging
 import os
 from dotenv import load_dotenv
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 backendMain = Blueprint('backendMain', __name__)
 
 @backendMain.route('/', methods=['GET'])
-def backend_main():
+async def backend_main():
     """
     Main route for the backend application.
     This route can be used to check if the backend is running.
@@ -20,7 +20,7 @@ def backend_main():
     return "Backend is running", 200
 
 @backendMain.route('/twilio-webhook', methods=['POST'])
-def twilio_webhook():
+async def twilio_webhook():
     """
     Webhook endpoint for Twilio to handle incoming audio streams.
     This route processes audio data, transcribes it, generates a reply,
@@ -28,12 +28,12 @@ def twilio_webhook():
     """
     logger.info("Received Twilio webhook request")
     ngrok_url = os.environ.get("NGROK_URL")
-    return render_template('twilio_response.xml', ngrok_url=ngrok_url), 200, {'Content-Type': 'application/xml'}
+    return await render_template('twilio_response.xml', ngrok_url=ngrok_url), 200, {'Content-Type': 'application/xml'}
 
-def twilio_media_ws(ws):
+async def twilio_media_ws():
     """
     WebSocket endpoint for Twilio Media Streams.
     """
-    media_ws_helper(ws)
+    await media_ws_helper(websocket)
 
 
