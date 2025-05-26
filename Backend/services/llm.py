@@ -1,8 +1,9 @@
-from langchain_community.llms import Ollama
-from langchain.agents import initialize_agent, Tool
-from langchain.chains import RetrievalQA
-from langchain.vectorstores import FAISS
-from langchain.embeddings import OllamaEmbeddings
+from langchain_ollama import OllamaLLM, OllamaEmbeddings
+from langchain_faiss import FAISS
+from langchain.chains.retrieval_qa import RetrievalQA
+from langchain.tools import Tool
+from langchain.agents import create_react_agent, AgentExecutor
+from langchain import hub
 from langchain.prompts import PromptTemplate
 from Backend.tools.dummy import get_bank_account_info
 
@@ -10,29 +11,21 @@ def init_agent(
     ollama_model: str,
     rag_docs: list = None,
     tools: list = None,
-    agent_type: str = "zero-shot-react-description"
 ):
     """
     Initializes a LangChain agent with Ollama, RAG, and tool access.
-
-    :param ollama_model: Name of the Ollama model to use.
-    :param rag_docs: List of documents for retrieval-augmented generation (RAG).
-    :param tools: List of Tool objects for agent tool access.
-    :param agent_type: Type of agent to initialize.
-    :return: Initialized agent.
     """
     # Initialize Ollama LLM
-    llm = Ollama(model=ollama_model)
+    llm = OllamaLLM(model=ollama_model)
 
     # Setup RAG if documents are provided
-    retriever = None
     if rag_docs:
         embeddings = OllamaEmbeddings(model=ollama_model)
         vectorstore = FAISS.from_texts(rag_docs, embedding=embeddings)
         retriever = vectorstore.as_retriever()
         qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
         rag_tool = Tool(
-            name="RAG Retriever",
+            name="RAG_Retriever",
             func=qa_chain.run,
             description="Useful for answering questions based on provided documents."
         )
@@ -42,7 +35,7 @@ def init_agent(
 
     # Add bank info tool
     bank_tool = Tool(
-        name="Bank Account Lookup",
+        name="Bank_Account_Lookup",
         func=get_bank_account_info,
         description="Retrieve bank account details by account number or name."
     )
@@ -50,14 +43,14 @@ def init_agent(
         tools = []
     tools.append(bank_tool)
 
-    # Initialize agent with tools
-    agent = initialize_agent(
-        tools or [],
-        llm,
-        agent=agent_type,
-        verbose=True
-    )
-    return agent
+    # Get a react prompt from hub
+    prompt = hub.pull("hwchase17/react")
+
+    # Create agent
+    agent = create_react_agent(llm, tools or [], prompt)
+    agent_executor = AgentExecutor(agent=agent, tools=tools or [], verbose=True)
+
+    return agent_executor
 
 class ConversationManager:
     """
