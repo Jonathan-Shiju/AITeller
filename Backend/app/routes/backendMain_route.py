@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ def twilio_webhook():
     and sends back the audio response.
     """
     logger.info("Received Twilio webhook request")
-    return render_template('twilio_response.xml'), 200, {'Content-Type': 'application/xml'}
+    ngrok_url = os.environ.get("NGROK_URL")
+    return render_template('twilio_response.xml', ngrok_url=ngrok_url), 200, {'Content-Type': 'application/xml'}
 
 
